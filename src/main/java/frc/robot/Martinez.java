@@ -11,11 +11,9 @@ import com.revrobotics.CANSparkBase.SoftLimitDirection;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
-//
-import edu.wpi.first.wpilibj2.command.Command;
-
 
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Martinez extends TimedRobot{
 
@@ -30,9 +28,26 @@ public class Martinez extends TimedRobot{
 
     private final int armCurrentLimitY = 20;
 
-    // something
-    private RobotContainer m_robotContainer;
+     // helper functions, sets arm output powers in horizontal/vertical direction and displays on SmartDash
+    public void setArmAxisMotor(String axis, double percent){
 
+        if (axis == "y"){
+
+            armAxisY.set(percent);
+            SmartDashboard.putNumber("armAxisY power (in %): ", percent);
+
+            return;
+        }
+
+        armAxisX.set(percent);
+        SmartDashboard.putNumber("armAxisX power (in %): ", percent);
+    }
+
+    /* 
+     * #################
+     * ##### MODES #####
+     * #################
+    */
 
     @Override
     public void robotInit(){
@@ -52,18 +67,42 @@ public class Martinez extends TimedRobot{
         armAxisX.setInverted(false);
         armAxisX.setNeutralMode(NeutralMode.Brake);
 
-        // button binding, puts autonomous chooser on the dashboard
-        // again, unsure of why this is the way it is, even after looking at RobotContainer.java
-        m_robotContainer = new RobotContainer();
+    }
+
+    // IMPORTANT: 
+    // Make sure all real functionality ceases when disabled. 
+    // You could hurt someone if you don't
+    @Override
+    public void disabledInit(){
+        armAxisX.set(0);
+        armAxisY.set(0);
     }
 
     @Override
-    public void teleopInit(){
-
-    }
+    public void teleopInit(){}
         
     @Override
     public void teleopPeriodic(){
+        double armPower;
+
+        // arm extension
+        if (mainController.getLeftTriggerAxis() > 0.5){armPower = armOutputPowerX;}
+        // arm retraction
+        else if (mainController.getRightTriggerAxis() > 0.5){armPower = -armOutputPowerX;}
+        // if joystick stationary, do nothing and let arm sit where it is
+        else{armPower = 0.0; armAxisX.setNeutralMode(NeutralMode.Brake);}
+        //armXAxis.stopMotor();
+
+        setArmAxisMotor("x", armPower);
+
+        // arm ascension
+        if (mainController.getLeftY() > 0.5){armPower = armOutputPowerY;}
+        // arm descension
+        else if (mainController.getLeftY() < -0.5){armPower = -armOutputPowerY;}
+        // if joystick stationary, do nothing and let arm sit where it is
+        else{armPower = 0.0; armAxisY.setIdleMode(IdleMode.kBrake);}
+
+        setArmAxisMotor("y", armPower);
 
     }
 
