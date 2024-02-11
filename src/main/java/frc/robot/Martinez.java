@@ -20,8 +20,8 @@ public class Martinez extends TimedRobot{
     static final XboxController mainController = new XboxController(0);
 
     // variables for controlling the intake and arm extension
-    private final CANSparkMax armAxisY = new CANSparkMax(11, MotorType.kBrushless);
-    private final WPI_TalonSRX armAxisX = new WPI_TalonSRX(3);
+    CANSparkMax armAxisY = new CANSparkMax(11, MotorType.kBrushless);
+    WPI_TalonSRX armAxisX = new WPI_TalonSRX(3);
 
     private final double armOutputPowerY = 0.6;
     private final double armOutputPowerX = 0.65;
